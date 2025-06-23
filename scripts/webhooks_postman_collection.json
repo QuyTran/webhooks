@@ -1,0 +1,229 @@
+{
+  "info": {
+    "name": "SAP Webhooks API",
+    "description": "Collection for testing the SAP Webhooks API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "host",
+      "value": "127.0.0.1",
+      "type": "string"
+    },
+    {
+      "key": "port",
+      "value": "9001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "List all webhooks",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-KEY",
+            "value": "nL/jnMd+IHCTk8M1vZPGgA==",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/api/webhooks/",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "api",
+            "webhooks",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get webhook by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-KEY",
+            "value": "nL/jnMd+IHCTk8M1vZPGgA==",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/api/webhooks/webhook123",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "api",
+            "webhooks",
+            "webhook123"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create webhook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-KEY",
+            "value": "nL/jnMd+IHCTk8M1vZPGgA==",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"event_type\": \"order.created\",\n    \"entity_id\": \"order-123456\",\n    \"data\": {\n        \"order_id\": \"ORD-123456\",\n        \"customer_id\": \"CUST-789\",\n        \"items\": [\n            {\"product_id\": \"PROD-001\", \"quantity\": 2, \"price\": 19.99},\n            {\"product_id\": \"PROD-002\", \"quantity\": 1, \"price\": 29.99}\n        ],\n        \"total\": 69.97\n    }\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{port}}/api/webhooks/",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "api",
+            "webhooks",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update webhook (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "X-API-KEY",
+            "value": "nL/jnMd+IHCTk8M1vZPGgA==",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"event_type\": \"order.updated\",\n    \"entity_id\": \"order-123456\",\n    \"data\": {\n        \"order_id\": \"ORD-123456\",\n        \"status\": \"processed\",\n        \"updated_at\": \"2023-09-15T14:30:00Z\",\n        \"updated_by\": \"system\"\n    }\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{port}}/api/webhooks/webhook123",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "api",
+            "webhooks",
+            "webhook123"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Partial update webhook (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-API-KEY",
+            "value": "nL/jnMd+IHCTk8M1vZPGgA==",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"event_type\": \"order.processed\",\n    \"data\": {\n        \"status\": \"shipped\",\n        \"tracking_number\": \"TRK123456789\"\n    }\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{port}}/api/webhooks/webhook123",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "api",
+            "webhooks",
+            "webhook123"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete webhook",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-API-KEY",
+            "value": "nL/jnMd+IHCTk8M1vZPGgA==",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/api/webhooks/webhook123",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "api",
+            "webhooks",
+            "webhook123"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/healthz",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "healthz"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+} 

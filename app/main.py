@@ -14,6 +14,8 @@ app = FastAPI(
     title="SAP Webhooks API",
     description="API for receiving and processing SAP webhooks",
     version="1.0.0",
+    # Disable redirect when URL doesn't have trailing slash
+    redirect_slashes=False,
 )
 
 # Configure CORS
@@ -45,6 +47,13 @@ app.include_router(router, prefix="/api")
 async def root():
     """Root endpoint redirects to API documentation."""
     return {"message": "Welcome to SAP Webhooks API", "docs_url": "/docs"}
+
+
+# Health check endpoint
+@app.get("/healthz", status_code=200, include_in_schema=True, tags=["health"])
+async def health_check():
+    """Health check endpoint for monitoring and Kubernetes."""
+    return {"status": "ok"}
 
 
 # Run the application if executed directly

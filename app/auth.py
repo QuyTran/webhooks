@@ -7,12 +7,12 @@ from typing import Optional
 from app.config import settings
 
 
-async def verify_api_key(api_key: Optional[str] = Header(None)) -> bool:
+async def verify_api_key(x_api_key: Optional[str] = Header(None, alias="X-API-KEY")) -> bool:
     """
     Verify if the provided API key is valid.
 
     Args:
-        api_key: The API key provided in the request header.
+        x_api_key: The API key provided in the X-API-KEY request header.
 
     Returns:
         bool: True if the API key is valid.
@@ -24,14 +24,14 @@ async def verify_api_key(api_key: Optional[str] = Header(None)) -> bool:
         # If no API key is configured, authentication is disabled
         return True
 
-    if api_key is None:
+    if x_api_key is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="API key is required",
             headers={"WWW-Authenticate": "ApiKey"},
         )
 
-    if api_key != settings.API_KEY:
+    if x_api_key != settings.API_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API key",

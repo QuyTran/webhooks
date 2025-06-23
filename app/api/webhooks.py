@@ -3,9 +3,31 @@ Webhook routes for receiving SAP data.
 """
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 
 from app.auth import verify_api_key
+
+# Configure logging
+# Create logs directory if it doesn't exist
+os.makedirs('logs', exist_ok=True)
+
+# Configure file handler
+file_handler = RotatingFileHandler(
+    'logs/webhooks.log',
+    maxBytes=10485760,  # 10MB
+    backupCount=5
+)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+))
+
+# Configure logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(file_handler)
 
 router = APIRouter()
 
@@ -15,6 +37,12 @@ class WebhookPayload(BaseModel):
     event_type: str
     entity_id: str
     data: Dict[str, Any]
+
+
+class WebhookUpdate(BaseModel):
+    """Model for webhook update data."""
+    event_type: Optional[str] = None
+    data: Optional[Dict[str, Any]] = None
 
 
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
@@ -29,22 +57,31 @@ async def receive_webhook(
     This endpoint accepts webhook payloads from SAP systems,
     processes them, and returns an acknowledgement.
     """
+    # Log request parameters
+    query_params = dict(request.query_params)
+    logger.info(f"POST Request Parameters: {query_params}")
+    logger.info(f"POST Request Body: {payload.dict()}")
+
     # Process the webhook data here
     # Example: Save to database, trigger a process, etc.
-
-    # Log the received webhook (example)
-    print(f"Received webhook: {payload.event_type} for {payload.entity_id}")
 
     return {"status": "accepted", "message": f"Webhook {payload.event_type} received"}
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def list_webhooks(_: bool = Depends(verify_api_key)) -> List[Dict[str, Any]]:
+async def list_webhooks(
+    request: Request,
+    _: bool = Depends(verify_api_key)
+) -> List[Dict[str, Any]]:
     """
     List recent webhooks received.
 
     Returns a list of recently received webhooks for monitoring purposes.
     """
+    # Log request parameters
+    query_params = dict(request.query_params)
+    logger.info(f"GET Request Parameters: {query_params}")
+
     # In a real application, retrieve from database or cache
     # This is just an example response
     recent_webhooks = [
@@ -63,3 +100,117 @@ async def list_webhooks(_: bool = Depends(verify_api_key)) -> List[Dict[str, Any
     ]
 
     return recent_webhooks
+
+
+@router.get("/{webhook_id}", status_code=status.HTTP_200_OK)
+async def get_webhook(
+    webhook_id: str,
+    request: Request,
+    _: bool = Depends(verify_api_key)
+) -> Dict[str, Any]:
+    """
+    Get a specific webhook by ID.
+
+    Returns details of a specific webhook.
+    """
+    # Log request parameters
+    query_params = dict(request.query_params)
+    logger.info(f"GET/{webhook_id} Request Parameters: {query_params}")
+
+    # In a real application, retrieve from database
+    # This is just an example response
+    webhook = {
+        "id": webhook_id,
+        "event_type": "order.created",
+        "entity_id": "order123",
+        "timestamp": "2023-09-15T10:30:00Z",
+        "data": {
+            "order_number": "ORD-12345",
+            "customer_id": "CUST-789",
+            "total_amount": 150.75
+        }
+    }
+
+    return webhook
+
+
+@router.put("/{webhook_id}", status_code=status.HTTP_200_OK)
+async def update_webhook(
+    webhook_id: str,
+    payload: WebhookPayload,
+    request: Request,
+    _: bool = Depends(verify_api_key)
+) -> Dict[str, Any]:
+    """
+    Update a webhook completely.
+
+    Replaces all data for a specific webhook.
+    """
+    # Log request parameters and body
+    query_params = dict(request.query_params)
+    logger.info(f"PUT/{webhook_id} Request Parameters: {query_params}")
+    logger.info(f"PUT/{webhook_id} Request Body: {payload.dict()}")
+
+    # In a real application, update in database
+    # This is just an example response
+    updated_webhook = {
+        "id": webhook_id,
+        "event_type": payload.event_type,
+        "entity_id": payload.entity_id,
+        "timestamp": "2023-09-15T11:45:00Z",
+        "data": payload.data,
+        "status": "updated"
+    }
+
+    return updated_webhook
+
+
+@router.patch("/{webhook_id}", status_code=status.HTTP_200_OK)
+async def partial_update_webhook(
+    webhook_id: str,
+    payload: WebhookUpdate,
+    request: Request,
+    _: bool = Depends(verify_api_key)
+) -> Dict[str, Any]:
+    """
+    Update a webhook partially.
+
+    Updates only the specified fields for a webhook.
+    """
+    # Log request parameters and body
+    query_params = dict(request.query_params)
+    logger.info(f"PATCH/{webhook_id} Request Parameters: {query_params}")
+    logger.info(f"PATCH/{webhook_id} Request Body: {payload.dict()}")
+
+    # In a real application, update in database
+    # This is just an example response
+    updated_webhook = {
+        "id": webhook_id,
+        "event_type": payload.event_type if payload.event_type else "order.created",
+        "entity_id": "order123",
+        "timestamp": "2023-09-15T12:15:00Z",
+        "data": payload.data if payload.data else {"status": "partially updated"},
+        "status": "partially_updated"
+    }
+
+    return updated_webhook
+
+
+@router.delete("/{webhook_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_webhook(
+    webhook_id: str,
+    request: Request,
+    _: bool = Depends(verify_api_key)
+):
+    """
+    Delete a webhook.
+
+    Removes a webhook from the system.
+    """
+    # Log request parameters
+    query_params = dict(request.query_params)
+    logger.info(f"DELETE/{webhook_id} Request Parameters: {query_params}")
+
+    # In a real application, delete from database
+    # For DELETE, we return no content
+    return None
