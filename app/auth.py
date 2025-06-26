@@ -8,6 +8,8 @@ from app.config import settings
 
 
 async def verify_api_key(x_api_key: Optional[str] = Header(None, alias="X-API-KEY")) -> bool:
+    """disable authentication for now"""
+    return True
     """
     Verify if the provided API key is valid.
 
