@@ -1,7 +1,7 @@
 """
 Webhook routes for receiving SAP data.
 """
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Response
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 import logging
@@ -31,6 +31,11 @@ logger.addHandler(file_handler)
 
 router = APIRouter()
 
+# Define custom headers to be returned with each response
+CUSTOM_HEADERS = [
+    {"name": "po", "value": "4500002481"}
+]
+
 
 class WebhookPayload(BaseModel):
     """Model for webhook payload data."""
@@ -45,10 +50,18 @@ class WebhookUpdate(BaseModel):
     data: Optional[Dict[str, Any]] = None
 
 
+def add_custom_headers(response: Response):
+    """Add custom headers to the response."""
+    for header in CUSTOM_HEADERS:
+        response.headers[header["name"]] = header["value"]
+    return response
+
+
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
 async def receive_webhook(
     payload: WebhookPayload,
     request: Request,
+    response: Response,
     _: bool = Depends(verify_api_key)
 ):
     """
@@ -62,6 +75,9 @@ async def receive_webhook(
     logger.info(f"POST Request Parameters: {query_params}")
     logger.info(f"POST Request Body: {payload.dict()}")
 
+    # Add custom headers to response
+    add_custom_headers(response)
+
     # Process the webhook data here
     # Example: Save to database, trigger a process, etc.
 
@@ -71,6 +87,7 @@ async def receive_webhook(
 @router.get("/", status_code=status.HTTP_200_OK)
 async def list_webhooks(
     request: Request,
+    response: Response,
     _: bool = Depends(verify_api_key)
 ) -> List[Dict[str, Any]]:
     """
@@ -81,6 +98,9 @@ async def list_webhooks(
     # Log request parameters
     query_params = dict(request.query_params)
     logger.info(f"GET Request Parameters: {query_params}")
+
+    # Add custom headers to response
+    add_custom_headers(response)
 
     # In a real application, retrieve from database or cache
     # This is just an example response
@@ -106,6 +126,7 @@ async def list_webhooks(
 async def get_webhook(
     webhook_id: str,
     request: Request,
+    response: Response,
     _: bool = Depends(verify_api_key)
 ) -> Dict[str, Any]:
     """
@@ -116,6 +137,9 @@ async def get_webhook(
     # Log request parameters
     query_params = dict(request.query_params)
     logger.info(f"GET/{webhook_id} Request Parameters: {query_params}")
+
+    # Add custom headers to response
+    add_custom_headers(response)
 
     # In a real application, retrieve from database
     # This is just an example response
@@ -139,6 +163,7 @@ async def update_webhook(
     webhook_id: str,
     payload: WebhookPayload,
     request: Request,
+    response: Response,
     _: bool = Depends(verify_api_key)
 ) -> Dict[str, Any]:
     """
@@ -150,6 +175,9 @@ async def update_webhook(
     query_params = dict(request.query_params)
     logger.info(f"PUT/{webhook_id} Request Parameters: {query_params}")
     logger.info(f"PUT/{webhook_id} Request Body: {payload.dict()}")
+
+    # Add custom headers to response
+    add_custom_headers(response)
 
     # In a real application, update in database
     # This is just an example response
@@ -170,6 +198,7 @@ async def partial_update_webhook(
     webhook_id: str,
     payload: WebhookUpdate,
     request: Request,
+    response: Response,
     _: bool = Depends(verify_api_key)
 ) -> Dict[str, Any]:
     """
@@ -181,6 +210,9 @@ async def partial_update_webhook(
     query_params = dict(request.query_params)
     logger.info(f"PATCH/{webhook_id} Request Parameters: {query_params}")
     logger.info(f"PATCH/{webhook_id} Request Body: {payload.dict()}")
+
+    # Add custom headers to response
+    add_custom_headers(response)
 
     # In a real application, update in database
     # This is just an example response
@@ -200,6 +232,7 @@ async def partial_update_webhook(
 async def delete_webhook(
     webhook_id: str,
     request: Request,
+    response: Response,
     _: bool = Depends(verify_api_key)
 ):
     """
@@ -210,6 +243,9 @@ async def delete_webhook(
     # Log request parameters
     query_params = dict(request.query_params)
     logger.info(f"DELETE/{webhook_id} Request Parameters: {query_params}")
+
+    # Add custom headers to response
+    add_custom_headers(response)
 
     # In a real application, delete from database
     # For DELETE, we return no content
