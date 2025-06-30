@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 import logging
 import os
+import json
 from logging.handlers import RotatingFileHandler
 
 from app.auth import verify_api_key
@@ -31,10 +32,24 @@ logger.addHandler(file_handler)
 
 router = APIRouter()
 
+# Load custom headers from the JSON file
+
+
+def load_custom_headers():
+    """Load custom headers from the JSON configuration file."""
+    headers_file = os.path.join(os.path.dirname(
+        os.path.dirname(__file__)), 'custom_headers.json')
+    try:
+        with open(headers_file, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logger.error(f"Error loading custom headers: {e}")
+        # Return empty list as fallback
+        return []
+
+
 # Define custom headers to be returned with each response
-CUSTOM_HEADERS = [
-    {"name": "po", "value": "4500002481"}
-]
+CUSTOM_HEADERS = load_custom_headers()
 
 
 class WebhookPayload(BaseModel):

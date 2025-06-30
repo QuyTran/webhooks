@@ -89,6 +89,19 @@ Configuration is managed through environment variables or a `.env` file:
 - `API_KEY`: API key for authentication
 - `SECRET_KEY`: Secret key for token generation
 
+### Custom Headers
+
+Custom headers are loaded from the `app/custom_headers.json` file. This file contains a list of headers that will be added to all API responses. The format is:
+
+```json
+[
+  {"name": "header-name", "value": "header-value"},
+  {"name": "another-header", "value": "another-value"}
+]
+```
+
+To modify the headers, simply edit this file and restart the application.
+
 ## Security
 
 - API Key authentication is required for all endpoints
